@@ -1,0 +1,45 @@
+services:
+  nebula-app:
+    container_name: nebula-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://nebula:nebula_password@db:5432/nebula_assets
+      - NEXTAUTH_SECRET=supersecretShouldChangeThisInProd
+      - NEXTAUTH_URL=http://localhost:3000
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - nebula-network
+
+  db:
+    container_name: nebula-db
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: nebula
+      POSTGRES_PASSWORD: nebula_password
+      POSTGRES_DB: nebula_assets
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nebula -d nebula_assets"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nebula-network
+
+networks:
+  nebula-network:
+    driver: bridge
+
+volumes:
+  db_data:
