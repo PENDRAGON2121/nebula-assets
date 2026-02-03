@@ -9,7 +9,7 @@ interface OverviewProps {
   }[]
 }
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-lg border bg-popover p-2 shadow-sm">
