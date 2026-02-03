@@ -51,9 +51,7 @@ export default async function ActivoDetailPage({ params }: { params: Promise<{ i
 
   // URL for QR Code (pointing to this page)
   // In production, this should be the full domain. Using window.location in client or env var in server.
-  // We'll use a placeholder base URL or relative path if scanned within app context, 
-  // but usually scanners need absolute URL.
-  // Assuming localhost for dev, but ideally use process.env.NEXT_PUBLIC_APP_URL
+  // We use NEXT_PUBLIC_APP_URL which is set in .env and docker-compose
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const qrValue = `${appUrl}/activos/${id}`;
 
