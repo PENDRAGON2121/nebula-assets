@@ -18,6 +18,11 @@ async function getUser(email: string): Promise<User | null> {
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
+  session: {
+    strategy: "jwt",
+  },
+  // Force insecure cookies in production if using HTTP (common in Docker/internal deployments)
+  useSecureCookies: process.env.NODE_ENV === 'production' && process.env.AUTH_URL?.startsWith('https://'),
   providers: [
     Credentials({
       async authorize(credentials) {
