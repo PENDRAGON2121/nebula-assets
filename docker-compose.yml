@@ -6,11 +6,11 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "3000:3000"
+      - "${APP_PORT:-3000}:3000"
     environment:
       - DATABASE_URL=postgresql://nebula:nebula_password@db:5432/nebula_assets
       - NEXTAUTH_SECRET=supersecretShouldChangeThisInProd
-      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_URL=http://localhost:${APP_PORT:-3000}
     depends_on:
       db:
         condition: service_healthy
