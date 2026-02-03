@@ -51,7 +51,7 @@ export async function globalSearchAction(query: string): Promise<SearchResult[]>
         title: p.nombre,
         subtitle: `${p.cargo || 'Sin cargo'} - ${p.departamento}`,
         type: 'person' as const,
-        url: `/personas` // We don't have a detail page for person yet, so go to list
+        url: `/personas/${p.id}`
     })))
 
     return results

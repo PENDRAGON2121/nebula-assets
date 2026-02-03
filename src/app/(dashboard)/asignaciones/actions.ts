@@ -19,8 +19,13 @@ export async function createAsignacionAction(formData: FormData) {
   let hojaUrl = null
 
   if (file && file.size > 0) {
-      if (file.size > 8 * 1024 * 1024) { // 8MB limit
-          return { success: false, error: "El archivo es demasiado grande (máximo 8MB)" }
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit (updated to match config)
+          return { success: false, error: "El archivo es demasiado grande (máximo 10MB)" }
+      }
+
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+      if (!allowedTypes.includes(file.type)) {
+          return { success: false, error: "Tipo de archivo no permitido. Solo se permiten imágenes (JPEG, PNG, WEBP) y PDF." }
       }
 
       try {

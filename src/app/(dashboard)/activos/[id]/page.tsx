@@ -4,10 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { PrintButton } from "@/components/activos/PrintButton";
+import { QRCodeDisplay } from "@/components/activos/QRCodeDisplay";
 
 export default async function ActivoDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -161,9 +161,7 @@ export default async function ActivoDetailPage({ params }: { params: Promise<{ i
                     <CardDescription>Para seguimiento físico.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center gap-4">
-                    <div className="bg-white p-4 rounded-lg border shadow-sm print:border-2 print:shadow-none">
-                        <QRCodeSVG value={qrValue} size={150} />
-                    </div>
+                    <QRCodeDisplay value={qrValue} assetCode={activo.codigoInterno} />
                     <div className="text-center">
                         <p className="font-bold text-lg">{activo.codigoInterno}</p>
                         <p className="text-xs text-muted-foreground text-wrap break-all">{id}</p>

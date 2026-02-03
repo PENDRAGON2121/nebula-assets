@@ -2,45 +2,34 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { StatsCardsSkeleton } from "@/components/dashboard/StatsCardsSkeleton";
 import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Overview } from "@/components/dashboard/Overview";
+import { AssetStatusChart } from "@/components/dashboard/AssetStatusChart";
 import { RecentAssignments } from "@/components/dashboard/RecentAssignments";
 import prisma from "@/lib/prisma";
-import { subDays, format } from "date-fns";
-import { es } from "date-fns/locale";
+import { toJSON } from "@/lib/utils";
 
-// Fetch Chart Data: Assignments per day in last 7 days
-async function getChartData() {
-    const today = new Date();
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
-        const d = subDays(today, 6 - i);
-        return {
-            date: d,
-            label: format(d, "EEE", { locale: es }), // Mon, Tue, Wed...
-            count: 0
-        };
-    });
+export const dynamic = 'force-dynamic';
 
-    // Get assignments from DB
-    const startDate = subDays(today, 7);
-    const assignments = await prisma.asignacion.findMany({
-        where: {
-            createdAt: {
-                gte: startDate
-            }
-        },
-        select: {
-            createdAt: true
+async function getAssetStatusData() {
+    const statusCounts = await prisma.activo.groupBy({
+        by: ['estado'],
+        _count: {
+            estado: true
         }
     });
 
-    // Aggregate
-    assignments.forEach(a => {
-        const dayStr = format(a.createdAt, "EEE", { locale: es });
-        const dayItem = last7Days.find(d => d.label === dayStr);
-        if (dayItem) dayItem.count++;
-    });
+    // Transform to chart format with colors
+    const colors: Record<string, string> = {
+        'DISPONIBLE': '#22c55e', // green-500
+        'ASIGNADO': '#3b82f6', // blue-500
+        'MANTENIMIENTO': '#eab308', // yellow-500
+        'BAJA': '#ef4444' // red-500
+    };
 
-    return last7Days.map(d => ({ name: d.label.charAt(0).toUpperCase() + d.label.slice(1), total: d.count }));
+    return statusCounts.map(item => ({
+        name: item.estado,
+        value: item._count.estado,
+        color: colors[item.estado] || '#94a3b8'
+    }));
 }
 
 async function getRecentAssignments() {
@@ -55,12 +44,12 @@ async function getRecentAssignments() {
         }
     });
 
-    // Serialize to plain JSON to avoid "object is not extensible" and Decimal issues
-    return JSON.parse(JSON.stringify(data));
+    // Serialize to plain JSON
+    return toJSON(data);
 }
 
 export default async function DashboardPage() {
-  const chartData = await getChartData();
+  const statusData = await getAssetStatusData();
   const recentAssignments = await getRecentAssignments();
 
   return (
@@ -74,11 +63,11 @@ export default async function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Actividad Reciente</CardTitle>
-            <CardDescription>Asignaciones realizadas en los últimos 7 días.</CardDescription>
+            <CardTitle>Estado del Inventario</CardTitle>
+            <CardDescription>Distribución de activos por estado actual.</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <Overview data={chartData} />
+            <AssetStatusChart data={statusData} />
           </CardContent>
         </Card>
         

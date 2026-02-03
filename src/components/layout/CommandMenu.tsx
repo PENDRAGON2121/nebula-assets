@@ -1,14 +1,7 @@
 "use client"
 
 import * as React from "react"
-import {
-  CalendarIcon,
-  EnvelopeClosedIcon,
-  FaceIcon,
-  GearIcon,
-  PersonIcon,
-  RocketIcon,
-} from "@radix-ui/react-icons" // Wait, I might not have radix icons, I should use lucide
+
 import { 
     LayoutDashboard, 
     Package, 
@@ -96,7 +89,7 @@ export function CommandMenu() {
           <span className="text-xs">/</span>
         </kbd>
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
         <CommandInput 
             placeholder="Escribe para buscar..." 
             value={query}
