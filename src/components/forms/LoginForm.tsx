@@ -42,7 +42,10 @@ export function LoginForm() {
       if (result?.error) {
         setError("Invalid email or password");
       } else {
-        router.push('/');
+        // Read callbackUrl from query params if available, otherwise default to /
+        const params = new URLSearchParams(window.location.search);
+        const callbackUrl = params.get('callbackUrl') || '/';
+        router.push(callbackUrl);
         router.refresh();
       }
     } catch (error) {
