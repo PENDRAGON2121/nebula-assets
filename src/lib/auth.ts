@@ -25,6 +25,22 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
   },
   // Force insecure cookies in production if using HTTP (common in Docker/internal deployments)
   useSecureCookies: process.env.NODE_ENV === 'production' && process.env.AUTH_URL?.startsWith('https://'),
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+        token.id = user.id as string;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.role = token.role as any;
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
+  },
   providers: [
     Credentials({
       async authorize(credentials) {

@@ -5,7 +5,8 @@ import {
   ArrowLeftRight, 
   Wrench, 
   Settings, 
-  LucideIcon
+  LucideIcon,
+  UserCog
 } from 'lucide-react';
 
 export interface NavItem {
@@ -20,5 +21,6 @@ export const navItems: NavItem[] = [
   { href: '/personas', label: 'Personas', icon: Users },
   { href: '/asignaciones', label: 'Asignaciones', icon: ArrowLeftRight },
   { href: '/mantenimientos', label: 'Mantenimientos', icon: Wrench },
+  { href: '/usuarios', label: 'Usuarios', icon: UserCog },
   { href: '/configuracion', label: 'Configuración', icon: Settings },
 ];
