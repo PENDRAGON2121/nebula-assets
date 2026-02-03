@@ -26,12 +26,20 @@ enum TipoMantenimiento {
   CORRECTIVO
 }
 
+enum EstadoMantenimiento {
+  PROGRAMADO
+  EN_PROCESO
+  COMPLETADO
+  CANCELADO
+}
+
 // Usuario del sistema (Administradores/Operadores)
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
   password      String?   // Opcional si usas solo OAuth, requerido para credenciales
+  image         String?   // Avatar URL
   role          Role      @default(USER)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -103,11 +111,13 @@ model Mantenimiento {
   activo        Activo            @relation(fields: [activoId], references: [id])
 
   tipo          TipoMantenimiento
+  estado        EstadoMantenimiento @default(PROGRAMADO)
   descripcion   String
   costo         Decimal?          @db.Decimal(10, 2)
   fechaInicio   DateTime
   fechaFin      DateTime?
   realizadoPor  String?           // Proveedor o técnico interno
+  comprobanteUrl String?          // URL o path al archivo adjunto (factura, informe, etc.)
 
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt

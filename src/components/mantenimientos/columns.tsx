@@ -82,16 +82,34 @@ export const columns: ColumnDef<any>[] = [
     cell: ({ row }) => new Date(row.getValue("fechaInicio")).toLocaleDateString()
   },
   {
-    accessorKey: "estado", // Virtual column for status
+    accessorKey: "estado",
     header: "Estado",
     cell: ({ row }) => {
-      const isActive = !row.original.fechaFin
+      const estado = row.original.estado
+      const colors: Record<string, string> = {
+          PROGRAMADO: "bg-blue-100 text-blue-800",
+          EN_PROCESO: "bg-yellow-100 text-yellow-800",
+          COMPLETADO: "bg-green-100 text-green-800",
+          CANCELADO: "bg-red-100 text-red-800"
+      }
       return (
-        <span className={`px-2 py-1 rounded-full text-xs font-semibold 
-            ${isActive ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}`}>
-            {isActive ? 'En Proceso' : 'Finalizado'}
+        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${colors[estado] || 'bg-gray-100 text-gray-800'}`}>
+            {estado}
         </span>
       )
+    }
+  },
+  {
+    id: "comprobante",
+    header: "Adjunto",
+    cell: ({ row }) => {
+        const url = row.original.comprobanteUrl
+        if (!url) return <span className="text-gray-400 text-xs">-</span>
+        return (
+            <a href={url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline text-sm font-medium">
+                Ver Archivo
+            </a>
+        )
     }
   },
   {

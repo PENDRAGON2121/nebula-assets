@@ -9,6 +9,7 @@ import { User } from 'next-auth';
 import { signOut } from 'next-auth/react';
 import { ModeToggle } from '@/components/mode-toggle';
 import { CommandMenu } from '@/components/layout/CommandMenu';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Header({ user }: { user?: User }) {
   return (
@@ -32,8 +33,15 @@ export function Header({ user }: { user?: User }) {
       <ModeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary" size="icon" className="rounded-full">
-            <CircleUser className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="rounded-full overflow-hidden">
+            {user?.image ? (
+               <Avatar className="h-8 w-8">
+                 <AvatarImage src={user.image} alt={user.name || "User"} />
+                 <AvatarFallback>{user.name?.substring(0, 2).toUpperCase() || "US"}</AvatarFallback>
+               </Avatar>
+            ) : (
+              <CircleUser className="h-5 w-5" />
+            )}
             <span className="sr-only">Toggle user menu</span>
           </Button>
         </DropdownMenuTrigger>

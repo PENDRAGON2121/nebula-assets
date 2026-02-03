@@ -19,6 +19,9 @@ import { updateProfileAction } from "@/app/(dashboard)/configuracion/actions"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ChangeEvent } from "react"
+
 const profileFormSchema = z.object({
   name: z.string().min(2, {
     message: "El nombre debe tener al menos 2 caracteres.",
@@ -31,7 +34,8 @@ interface ProfileFormProps {
     user: {
         name?: string | null
         email?: string | null
-        role?: string | null // Assuming role might be passed or just static for now since schema has Role enum but next-auth session might vary
+        image?: string | null
+        role?: string | null
     }
 }
 
@@ -39,6 +43,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+    const [preview, setPreview] = useState<string | null>(user.image || null)
+    const [file, setFile] = useState<File | null>(null)
 
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
@@ -47,11 +53,25 @@ export function ProfileForm({ user }: ProfileFormProps) {
         },
     })
 
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const selectedFile = e.target.files[0];
+            setFile(selectedFile);
+            setPreview(URL.createObjectURL(selectedFile));
+        }
+    }
+
     async function onSubmit(data: ProfileFormValues) {
         setIsLoading(true)
         setMessage(null)
         
-        const result = await updateProfileAction(data)
+        const formData = new FormData()
+        formData.append('name', data.name)
+        if (file) {
+            formData.append('avatar', file)
+        }
+
+        const result = await updateProfileAction(formData)
         
         if (result.success) {
             setMessage({ type: 'success', text: "Perfil actualizado correctamente" })
@@ -65,13 +85,39 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {message && (
                     <div className={`p-3 rounded-md text-sm ${message.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
                         {message.text}
                     </div>
                 )}
                 
+                <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6">
+                    <Avatar className="h-24 w-24">
+                        <AvatarImage src={preview || ""} alt={user.name || "User"} />
+                        <AvatarFallback className="text-xl">
+                            {user.name?.substring(0, 2).toUpperCase() || "US"}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col space-y-2">
+                        <FormLabel htmlFor="avatar-upload" className="cursor-pointer">
+                            <div className="flex h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background hover:bg-accent hover:text-accent-foreground">
+                                Cambiar Foto
+                            </div>
+                            <Input 
+                                id="avatar-upload"
+                                type="file" 
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+                        </FormLabel>
+                        <p className="text-xs text-muted-foreground">
+                            JPG, PNG o WEBP. Máx 5MB.
+                        </p>
+                    </div>
+                </div>
+
                 <FormField
                     control={form.control}
                     name="name"

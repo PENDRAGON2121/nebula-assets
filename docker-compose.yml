@@ -7,6 +7,8 @@ services:
     restart: always
     ports:
       - "${APP_PORT:-3000}:3000"
+    volumes:
+      - uploads_data:/app/public/uploads
     environment:
       - DATABASE_URL=postgresql://nebula:nebula_password@db:5432/nebula_assets
       - NEXTAUTH_SECRET=supersecretShouldChangeThisInProd
@@ -43,3 +45,4 @@ networks:
 
 volumes:
   db_data:
+  uploads_data:

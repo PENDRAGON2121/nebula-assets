@@ -29,7 +29,8 @@ export default async function ConfiguracionPage() {
           <CardContent>
             <ProfileForm user={{ 
                 name: session?.user?.name, 
-                email: session?.user?.email 
+                email: session?.user?.email,
+                image: session?.user?.image 
             }} />
           </CardContent>
         </Card>

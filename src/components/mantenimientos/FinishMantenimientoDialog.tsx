@@ -40,12 +40,13 @@ export function FinishMantenimientoDialog({ isOpen, onClose, mantenimientoId, ac
   async function onSubmit(values: z.infer<typeof FinishSchema>) {
     setLoading(true);
     try {
-      const result = await finishMantenimientoAction({
-        mantenimientoId,
-        activoId,
-        costo: Number(values.costo),
-        fechaFin: new Date(values.fechaFin),
-      });
+      const formData = new FormData();
+      formData.append('mantenimientoId', mantenimientoId);
+      formData.append('activoId', activoId);
+      formData.append('costo', String(values.costo));
+      formData.append('fechaFin', values.fechaFin);
+
+      const result = await finishMantenimientoAction(formData);
 
       if (result.success) {
         form.reset();

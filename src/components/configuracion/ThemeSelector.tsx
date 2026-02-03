@@ -7,6 +7,28 @@ import { Laptop, Moon, Sun } from "lucide-react"
 
 export function ThemeSelector() {
   const { setTheme, theme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Avoid hydration mismatch by rendering a placeholder or default state until mounted
+  if (!mounted) {
+      return (
+        <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="gap-2" disabled>
+                <Sun className="h-4 w-4" /> Light
+            </Button>
+             <Button variant="outline" size="sm" className="gap-2" disabled>
+                <Moon className="h-4 w-4" /> Dark
+            </Button>
+             <Button variant="outline" size="sm" className="gap-2" disabled>
+                <Laptop className="h-4 w-4" /> System
+            </Button>
+        </div>
+      )
+  }
 
   return (
     <div className="flex items-center gap-2">
