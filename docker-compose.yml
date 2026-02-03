@@ -11,6 +11,8 @@ services:
       - uploads_data:/app/public/uploads
     environment:
       - DATABASE_URL=postgresql://nebula:nebula_password@db:5432/nebula_assets
+      - POSTGRES_PRISMA_URL=postgresql://nebula:nebula_password@db:5432/nebula_assets
+      - POSTGRES_URL_NON_POOLING=postgresql://nebula:nebula_password@db:5432/nebula_assets
       - NEXTAUTH_SECRET=supersecretShouldChangeThisInProd
       - NEXTAUTH_URL=http://localhost:${APP_PORT:-3000}
       - AUTH_TRUST_HOST=true
