@@ -44,7 +44,16 @@ export function LoginForm() {
       } else {
         // Read callbackUrl from query params if available, otherwise default to /
         const params = new URLSearchParams(window.location.search);
-        const callbackUrl = params.get('callbackUrl') || '/';
+        let callbackUrl = params.get('callbackUrl') || '/';
+        
+        // Force relative path to avoid domain mismatch (e.g. localhost vs IP)
+        try {
+            const urlObj = new URL(callbackUrl);
+            callbackUrl = urlObj.pathname + urlObj.search + urlObj.hash;
+        } catch (e) {
+            // Already relative or invalid, assume relative is safe
+        }
+
         router.push(callbackUrl);
         router.refresh();
       }
