@@ -52,4 +52,12 @@ ENV PORT=3000
 # set hostname to localhost
 ENV HOSTNAME="0.0.0.0"
 
+# Trust Host by default in Docker (Fixes UntrustedHost error)
+ENV AUTH_TRUST_HOST=true
+
+# Default Secret for NextAuth (Prevents MissingSecret error if not passed at runtime)
+# WARN: Override this in production!
+ENV AUTH_SECRET="supersecretShouldChangeThisInProd"
+ENV NEXTAUTH_SECRET="supersecretShouldChangeThisInProd"
+
 CMD ["node", "server.js"]
