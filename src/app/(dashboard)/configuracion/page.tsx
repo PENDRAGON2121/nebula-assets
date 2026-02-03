@@ -1,11 +1,11 @@
 import { auth } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 import { ThemeSelector } from "@/components/configuracion/ThemeSelector";
+import { ProfileForm } from "@/components/configuracion/ProfileForm";
 
 export default async function ConfiguracionPage() {
   const session = await auth();
@@ -26,19 +26,11 @@ export default async function ConfiguracionPage() {
             <CardTitle>Perfil de Usuario</CardTitle>
             <CardDescription>Información de tu cuenta actual.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Nombre</Label>
-              <Input value={session?.user?.name || ''} disabled />
-            </div>
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input value={session?.user?.email || ''} disabled />
-            </div>
-            <div className="space-y-2">
-              <Label>Rol</Label>
-              <Input value="Administrador" disabled />
-            </div>
+          <CardContent>
+            <ProfileForm user={{ 
+                name: session?.user?.name, 
+                email: session?.user?.email 
+            }} />
           </CardContent>
         </Card>
 
