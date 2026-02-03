@@ -1,0 +1,114 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL") // Connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // Direct connection
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Enums
+enum Role {
+  ADMIN
+  USER
+}
+
+enum EstadoActivo {
+  DISPONIBLE
+  ASIGNADO
+  MANTENIMIENTO
+  BAJA
+}
+
+enum TipoMantenimiento {
+  PREVENTIVO
+  CORRECTIVO
+}
+
+// Usuario del sistema (Administradores/Operadores)
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String?   // Opcional si usas solo OAuth, requerido para credenciales
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// El Activo Físico (Laptop, Monitor, Vehículo, etc.)
+model Activo {
+  id            String        @id @default(cuid())
+  nombre        String
+  descripcion   String?
+  serial        String?       @unique // Crítico para inventario
+  codigoInterno String        @unique // Placa de inventario de la empresa
+  marca         String
+  modelo        String?
+  imagenUrl     String?
+  estado        EstadoActivo  @default(DISPONIBLE)
+  
+  fechaCompra   DateTime
+  precioCompra  Decimal       @db.Decimal(10, 2)
+  vidaUtilMeses Int?          // Para depreciación
+
+  // Relaciones
+  asignaciones  Asignacion[]
+  mantenimientos Mantenimiento[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+// Empleados o Departamentos que reciben los activos
+model Persona {
+  id            String       @id @default(cuid())
+  nombre        String
+  email         String       @unique
+  departamento  String
+  cargo         String?
+  activo        Boolean      @default(true) // Si el empleado sigue en la empresa
+
+  asignaciones  Asignacion[]
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+// Historial de quién tuvo qué activo y cuándo
+model Asignacion {
+  id            String    @id @default(cuid())
+  
+  activoId      String
+  activo        Activo    @relation(fields: [activoId], references: [id])
+  
+  personaId     String
+  persona       Persona   @relation(fields: [personaId], references: [id])
+
+  fechaAsignacion DateTime  @default(now())
+  fechaDevolucion DateTime? // Null significa "actualmente asignado"
+  observaciones   String?
+  hojaAsignacionUrl String? // URL to the uploaded physical assignment sheet image
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// Registro de reparaciones o revisiones
+model Mantenimiento {
+  id            String            @id @default(cuid())
+  
+  activoId      String
+  activo        Activo            @relation(fields: [activoId], references: [id])
+
+  tipo          TipoMantenimiento
+  descripcion   String
+  costo         Decimal?          @db.Decimal(10, 2)
+  fechaInicio   DateTime
+  fechaFin      DateTime?
+  realizadoPor  String?           // Proveedor o técnico interno
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
