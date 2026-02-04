@@ -5,8 +5,16 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
+import { auth } from '@/lib/auth'
+import { hasPermission } from '@/lib/rbac'
+import { PERMISSIONS } from '@/config/permissions'
 
 export async function createAsignacionAction(formData: FormData) {
+  const session = await auth();
+  if (!hasPermission(session?.user, PERMISSIONS.ASSIGNMENTS.WRITE)) {
+      return { success: false, error: "No tienes permisos para crear asignaciones" };
+  }
+
   const activoId = formData.get('activoId') as string
   const personaId = formData.get('personaId') as string
   const observaciones = formData.get('observaciones') as string
@@ -80,6 +88,11 @@ export async function createAsignacionAction(formData: FormData) {
 }
 
 export async function returnActivoAction(asignacionId: string, activoId: string) {
+  const session = await auth();
+  if (!hasPermission(session?.user, PERMISSIONS.ASSIGNMENTS.WRITE)) {
+      return { success: false, error: "No tienes permisos para devolver activos" };
+  }
+
   try {
     await prisma.$transaction(async (tx) => {
       // 1. Close Asignacion

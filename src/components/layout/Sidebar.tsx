@@ -5,11 +5,15 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { navItems } from '@/config/nav';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
+import { hasPermission } from '@/lib/rbac';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   return (
     <div className={cn("flex h-full flex-col bg-muted/40", className)}>
@@ -22,6 +26,10 @@ export function Sidebar({ className }: SidebarProps) {
       <div className="flex-1 overflow-auto py-2">
         <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
           {navItems.map((item) => {
+            if (item.permission && !hasPermission(user, item.permission)) {
+              return null;
+            }
+
             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             return (
               <Link

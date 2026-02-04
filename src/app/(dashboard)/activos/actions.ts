@@ -4,6 +4,9 @@ import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { EstadoActivo } from '@prisma/client'
+import { auth } from '@/lib/auth'
+import { hasPermission } from '@/lib/rbac'
+import { PERMISSIONS } from '@/config/permissions'
 
 const ActivoSchema = z.object({
   nombre: z.string().min(1, "El nombre es obligatorio"),
@@ -19,6 +22,11 @@ const ActivoSchema = z.object({
 export type ActivoFormValues = z.infer<typeof ActivoSchema>
 
 export async function createActivoAction(data: ActivoFormValues) {
+  const session = await auth();
+  if (!hasPermission(session?.user, PERMISSIONS.ASSETS.WRITE)) {
+    return { success: false, error: "No tienes permisos para crear activos" };
+  }
+
   const validated = ActivoSchema.safeParse(data);
   if (!validated.success) {
     return { success: false, error: validated.error.flatten() };
@@ -40,6 +48,11 @@ export async function createActivoAction(data: ActivoFormValues) {
 }
 
 export async function updateActivoAction(id: string, data: ActivoFormValues) {
+    const session = await auth();
+    if (!hasPermission(session?.user, PERMISSIONS.ASSETS.WRITE)) {
+      return { success: false, error: "No tienes permisos para actualizar activos" };
+    }
+
     const validated = ActivoSchema.safeParse(data);
     if (!validated.success) {
       return { success: false, error: validated.error.flatten() };
@@ -60,6 +73,11 @@ export async function updateActivoAction(id: string, data: ActivoFormValues) {
 }
 
 export async function deleteActivoAction(id: string) {
+  const session = await auth();
+  if (!hasPermission(session?.user, PERMISSIONS.ASSETS.DELETE)) {
+    return { success: false, error: "No tienes permisos para eliminar activos" };
+  }
+
   try {
     await prisma.activo.delete({ where: { id } })
     revalidatePath('/activos')

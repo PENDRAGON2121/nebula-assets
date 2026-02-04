@@ -7,6 +7,8 @@ import { TipoMantenimiento, EstadoMantenimiento } from '@prisma/client'
 import { auth } from '@/lib/auth'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
+import { hasPermission } from '@/lib/rbac'
+import { PERMISSIONS } from '@/config/permissions'
 
 const CreateMantenimientoSchema = z.object({
   activoId: z.string().min(1, "Activo requerido"),
@@ -29,6 +31,10 @@ export async function createMantenimientoAction(formData: FormData) {
   const session = await auth()
   if (!session?.user) {
       return { success: false, error: "No autorizado" }
+  }
+  
+  if (!hasPermission(session.user, PERMISSIONS.MAINTENANCE.WRITE)) {
+      return { success: false, error: "No tienes permisos para registrar mantenimientos" };
   }
 
   const file = formData.get('comprobante') as File | null
@@ -117,6 +123,11 @@ export async function finishMantenimientoAction(formData: FormData) {
   // Adapted to accept FormData for potential file upload on finish too (e.g. final invoice)
   // For now, keeping logic similar but parsing FormData
   
+  const session = await auth();
+  if (!hasPermission(session?.user, PERMISSIONS.MAINTENANCE.WRITE)) {
+      return { success: false, error: "No tienes permisos para finalizar mantenimientos" };
+  }
+
   const rawData = {
       mantenimientoId: formData.get('mantenimientoId'),
       activoId: formData.get('activoId'),

@@ -5,6 +5,8 @@ import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import bcrypt from "bcryptjs"
+import { hasPermission } from "@/lib/rbac"
+import { PERMISSIONS } from "@/config/permissions"
 
 const UserSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -15,8 +17,7 @@ const UserSchema = z.object({
 
 export async function getRoles() {
     const session = await auth()
-    // Authorization check - only ADMIN can see roles list for assignment
-    if (session?.user?.role !== 'ADMIN') return []
+    if (!hasPermission(session?.user, PERMISSIONS.USERS.READ)) return []
     return await prisma.role.findMany({
         orderBy: { name: 'asc' }
     })
@@ -24,7 +25,7 @@ export async function getRoles() {
 
 export async function getUsers() {
     const session = await auth()
-    if (session?.user?.role !== 'ADMIN') return []
+    if (!hasPermission(session?.user, PERMISSIONS.USERS.READ)) return []
     
     const users = await prisma.user.findMany({
         orderBy: { createdAt: 'desc' },
@@ -33,21 +34,21 @@ export async function getUsers() {
         }
     })
     
-    // Transform for UI consumption - keeping 'role' as string name for backward compat
+    // Transform for UI consumption
     return users.map(user => ({
         id: user.id,
         name: user.name,
         email: user.email,
         image: user.image,
         createdAt: user.createdAt,
-        role: user.role?.name || 'N/A', // Display name
-        roleId: user.roleId || '' // ID for editing
+        role: user.role?.name || 'N/A', 
+        roleId: user.roleId || '' 
     }))
 }
 
 export async function createUser(data: z.infer<typeof UserSchema>) {
     const session = await auth()
-    if (session?.user?.role !== 'ADMIN') {
+    if (!hasPermission(session?.user, PERMISSIONS.USERS.WRITE)) {
         return { success: false, error: "No tienes permisos para realizar esta acción" }
     }
 
@@ -88,7 +89,7 @@ export async function createUser(data: z.infer<typeof UserSchema>) {
 
 export async function updateUser(id: string, data: Partial<z.infer<typeof UserSchema>>) {
     const session = await auth()
-    if (session?.user?.role !== 'ADMIN') {
+    if (!hasPermission(session?.user, PERMISSIONS.USERS.WRITE)) {
         return { success: false, error: "No tienes permisos" }
     }
 
@@ -118,7 +119,7 @@ export async function updateUser(id: string, data: Partial<z.infer<typeof UserSc
 
 export async function deleteUser(id: string) {
     const session = await auth()
-    if (session?.user?.role !== 'ADMIN') {
+    if (!hasPermission(session?.user, PERMISSIONS.USERS.DELETE) || !session?.user?.id) {
         return { success: false, error: "No tienes permisos" }
     }
 
@@ -138,6 +139,7 @@ export async function deleteUser(id: string) {
 
 export async function updateRolePermissions(roleId: string, permissionIds: string[]) {
     const session = await auth()
+    // Role management is strictly for ADMIN role for now, or could be a specific permission
     if (session?.user?.role !== 'ADMIN') return { success: false, error: "Unauthorized" }
 
     try {

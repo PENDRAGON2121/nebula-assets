@@ -1,21 +1,52 @@
 import { PrismaClient } from '@prisma/client'
+
+// Manually define permissions here to avoid ts-node import issues with aliases/extensions
+const PERMISSIONS = {
+  USERS: {
+    READ: 'users:read',
+    WRITE: 'users:write',
+    DELETE: 'users:delete',
+  },
+  ASSETS: {
+    READ: 'assets:read',
+    WRITE: 'assets:write',
+    DELETE: 'assets:delete',
+  },
+  PEOPLE: {
+    READ: 'people:read',
+    WRITE: 'people:write',
+    DELETE: 'people:delete',
+  },
+  MAINTENANCE: {
+    READ: 'maintenance:read',
+    WRITE: 'maintenance:write',
+  },
+  ASSIGNMENTS: {
+    READ: 'assignments:read',
+    WRITE: 'assignments:write',
+  }
+} as const;
+
+const ALL_PERMISSIONS = [
+  ...Object.values(PERMISSIONS.USERS),
+  ...Object.values(PERMISSIONS.ASSETS),
+  ...Object.values(PERMISSIONS.PEOPLE),
+  ...Object.values(PERMISSIONS.MAINTENANCE),
+  ...Object.values(PERMISSIONS.ASSIGNMENTS),
+];
+
 const prisma = new PrismaClient()
 
-const permissions = [
-    'users:read', 'users:write', 'users:delete',
-    'assets:read', 'assets:write', 'assets:delete',
-    'maintenance:read', 'maintenance:write',
-]
-
 async function main() {
-    for (const p of permissions) {
+    for (const p of ALL_PERMISSIONS) {
+        const [module, action] = p.split(':');
         await prisma.permission.upsert({
             where: { name: p },
             update: {},
-            create: { name: p, description: `Permission to ${p.split(':')[1]} ${p.split(':')[0]}` }
+            create: { name: p, description: `Permission to ${action} ${module}` }
         })
     }
-    console.log('Permissions seeded')
+    console.log('Permissions seeded from config')
 }
 
 main()
