@@ -12,6 +12,23 @@ export const authConfig = {
     signIn: '/login',
   },
   callbacks: {
+    // Logic to hydrate session in Middleware (Edge compatible)
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+        token.permissions = user.permissions || [];
+        token.id = user.id as string;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.role = token.role as string;
+        session.user.permissions = token.permissions as string[];
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       
@@ -33,6 +50,9 @@ export const authConfig = {
           // RBAC Checks
           const user = auth.user;
           const path = nextUrl.pathname;
+          
+          // Debug (Optional, remove in prod)
+          // console.log("Middleware Check:", { path, role: user.role, perms: user.permissions?.length });
 
           if (path.startsWith('/activos') && !hasPermission(user, PERMISSIONS.ASSETS.READ)) return false;
           if (path.startsWith('/personas') && !hasPermission(user, PERMISSIONS.PEOPLE.READ)) return false;
