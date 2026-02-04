@@ -4,11 +4,17 @@ import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { User } from '@prisma/client';
 
-async function getUser(email: string): Promise<User | null> {
+async function getUser(email: string) {
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ 
+        where: { email },
+        include: {
+            role: {
+                include: { permissions: true }
+            }
+        }
+    });
     return user;
   } catch (error) {
     console.error('Failed to fetch user:', error);
@@ -29,13 +35,15 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
+        token.permissions = user.permissions || [];
         token.id = user.id as string;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.role = token.role as any;
+        session.user.role = token.role as string;
+        session.user.permissions = token.permissions as string[];
         session.user.id = token.id as string;
       }
       return session;
@@ -57,7 +65,16 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
           if (!user.password) return null;
            
           const passwordsMatch = await bcrypt.compare(password, user.password);
-          if (passwordsMatch) return user;
+          if (passwordsMatch) {
+              return {
+                  id: user.id,
+                  name: user.name,
+                  email: user.email,
+                  image: user.image,
+                  role: user.role?.name || 'USER',
+                  permissions: user.role?.permissions.map(p => p.name) || []
+              }
+          }
         }
 
         console.log('Invalid credentials');

@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth"
 import { AddUserButton } from "@/components/usuarios/AddUserButton"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ShieldAlert } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default async function UsuariosPage() {
   const session = await auth()
@@ -27,7 +29,12 @@ export default async function UsuariosPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Gestión de Usuarios</h1>
-        <AddUserButton />
+        <div className="flex gap-2">
+            <Link href="/usuarios/roles">
+                <Button variant="outline">Gestionar Roles</Button>
+            </Link>
+            <AddUserButton />
+        </div>
       </div>
       
       <Card>

@@ -10,25 +10,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUser, updateUser } from '@/app/(dashboard)/usuarios/actions';
+import { createUser, updateUser, getRoles } from '@/app/(dashboard)/usuarios/actions';
 import { UserObj } from './columns';
 
 const UserFormSchema = z.object({
   name: z.string().min(2, "Mínimo 2 caracteres"),
   email: z.string().email("Email inválido"),
-  password: z.string().optional(), // Optional for edit
-  role: z.enum(["ADMIN", "USER"]),
+  password: z.string().optional(),
+  roleId: z.string().min(1, "Rol requerido"),
 });
 
 interface UserDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  user?: UserObj; // If present, it's edit mode
+  user?: UserObj;
 }
 
 export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = useState<{id: string, name: string}[]>([]);
   const isEdit = !!user;
 
   const form = useForm<z.infer<typeof UserFormSchema>>({
@@ -37,29 +38,32 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
       name: '',
       email: '',
       password: '',
-      role: 'USER',
+      roleId: '',
     },
   });
 
-  // Reset form when opening dialog or switching user
   useEffect(() => {
-      if (isOpen) {
-          if (user) {
-              form.reset({
-                  name: user.name || '',
-                  email: user.email,
-                  role: user.role,
-                  password: '' 
-              })
-          } else {
-              form.reset({
-                  name: '',
-                  email: '',
-                  role: 'USER',
-                  password: ''
-              })
-          }
-      }
+    if (isOpen) {
+        getRoles().then(fetchedRoles => {
+            setRoles(fetchedRoles);
+            
+            if (user) {
+                form.reset({
+                    name: user.name || '',
+                    email: user.email,
+                    roleId: user.roleId || '', 
+                    password: '' 
+                })
+            } else {
+                form.reset({
+                    name: '',
+                    email: '',
+                    roleId: '',
+                    password: ''
+                })
+            }
+        });
+    }
   }, [isOpen, user, form])
 
 
@@ -71,14 +75,12 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
       if (isEdit && user) {
           result = await updateUser(user.id, values);
       } else {
-          // Validate password for new user
           if (!values.password || values.password.length < 6) {
              form.setError('password', { message: "Contraseña requerida (min 6 caracteres)" });
              setLoading(false);
              return;
           }
-          // Type casting needed because Zod enum vs Prisma enum type mismatch in TS
-          result = await createUser(values as any);
+          result = await createUser(values);
       }
 
       if (result.success) {
@@ -133,19 +135,22 @@ export function UserDialog({ isOpen, onClose, user }: UserDialogProps) {
 
             <FormField
               control={form.control}
-              name="role"
+              name="roleId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Rol</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Seleccionar rol" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="USER">Usuario (Operador)</SelectItem>
-                      <SelectItem value="ADMIN">Administrador</SelectItem>
+                      {roles.map(role => (
+                          <SelectItem key={role.id} value={role.id}>
+                              {role.name}
+                          </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />

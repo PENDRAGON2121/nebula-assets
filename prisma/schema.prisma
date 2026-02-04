@@ -9,11 +9,6 @@ generator client {
 }
 
 // Enums
-enum Role {
-  ADMIN
-  USER
-}
-
 enum EstadoActivo {
   DISPONIBLE
   ASIGNADO
@@ -33,6 +28,30 @@ enum EstadoMantenimiento {
   CANCELADO
 }
 
+// Roles y Permisos Dinámicos
+model Role {
+  id          String       @id @default(cuid())
+  name        String       @unique // "ADMIN", "USER", etc.
+  description String?
+  
+  permissions Permission[]
+  users       User[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique // "users:create", "assets:delete"
+  description String?
+  
+  roles       Role[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 // Usuario del sistema (Administradores/Operadores)
 model User {
   id            String    @id @default(cuid())
@@ -40,7 +59,11 @@ model User {
   email         String    @unique
   password      String?   // Opcional si usas solo OAuth, requerido para credenciales
   image         String?   // Avatar URL
-  role          Role      @default(USER)
+  
+  // Relación con Role
+  roleId        String?   // Opcional temporalmente para facilitar migración
+  role          Role?     @relation(fields: [roleId], references: [id])
+  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }

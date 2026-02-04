@@ -21,7 +21,8 @@ export type UserObj = {
   id: string
   name: string | null
   email: string
-  role: "ADMIN" | "USER"
+  role: string
+  roleId: string
   image: string | null
   createdAt: Date
 }

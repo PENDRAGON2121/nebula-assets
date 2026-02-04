@@ -4,6 +4,13 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
+  // Ensure roles exist
+  const adminRole = await prisma.role.upsert({
+      where: { name: 'ADMIN' },
+      update: {},
+      create: { name: 'ADMIN', description: 'Administrator' }
+  })
+
   // Existing Default Admin
   const email = 'admin@nebula.com'
   const password = 'password123'
@@ -11,12 +18,14 @@ async function main() {
 
   const user = await prisma.user.upsert({
     where: { email },
-    update: {},
+    update: {
+        role: { connect: { id: adminRole.id } }
+    },
     create: {
       email,
       name: 'Admin Nebula',
       password: hashedPassword,
-      role: 'ADMIN',
+      role: { connect: { id: adminRole.id } },
     },
   })
 
@@ -29,13 +38,13 @@ async function main() {
     where: { email: newAdminEmail },
     update: {
       password: newAdminHashedPassword, // Ensure password is correct if user exists
-      role: 'ADMIN'
+      role: { connect: { id: adminRole.id } }
     },
     create: {
       email: newAdminEmail,
       name: 'M Quiros',
       password: newAdminHashedPassword,
-      role: 'ADMIN',
+      role: { connect: { id: adminRole.id } },
     },
   })
 

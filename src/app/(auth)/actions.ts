@@ -30,7 +30,9 @@ export async function registerFirstUser(data: z.infer<typeof registerSchema>) {
         name: data.name,
         email: data.email,
         password: hashedPassword,
-        role: "ADMIN",
+        role: {
+          connect: { name: 'ADMIN' }
+        },
       },
     })
 
