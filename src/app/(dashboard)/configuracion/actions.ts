@@ -22,6 +22,7 @@ export async function updateProfileAction(formData: FormData) {
 
     let imageUrl = undefined;
 
+    /*
     if (file && file.size > 0) {
         if (file.size > 5 * 1024 * 1024) { // 5MB limit
             return { success: false, error: "La imagen es demasiado grande (máximo 5MB)" }
@@ -54,6 +55,7 @@ export async function updateProfileAction(formData: FormData) {
             return { success: false, error: "Error al subir la imagen" }
         }
     }
+    */
 
     const userEmail = session.user.email;
     

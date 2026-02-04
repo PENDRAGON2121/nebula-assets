@@ -100,6 +100,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col space-y-2">
+                        {/* 
                         <FormLabel htmlFor="avatar-upload" className="cursor-pointer">
                             <div className="flex h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background hover:bg-accent hover:text-accent-foreground">
                                 Cambiar Foto
@@ -114,6 +115,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
                         </FormLabel>
                         <p className="text-xs text-muted-foreground">
                             JPG, PNG o WEBP. Máx 5MB.
+                        </p>
+                        */}
+                        <p className="text-xs text-muted-foreground italic">
+                            Cambio de imagen deshabilitado temporalmente.
                         </p>
                     </div>
                 </div>
