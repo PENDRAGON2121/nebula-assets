@@ -39,6 +39,9 @@ RUN chown nextjs:nodejs .next
 
 # Copy necessary files
 COPY --from=builder /app/public ./public
+RUN mkdir -p ./public/uploads
+RUN chown -R nextjs:nodejs ./public
+
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy prisma schema for runtime needs (if any)
