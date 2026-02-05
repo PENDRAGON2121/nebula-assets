@@ -3,8 +3,6 @@
 import { auth } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
 
 export async function updateProfileAction(formData: FormData) {
     const session = await auth()
@@ -20,12 +18,11 @@ export async function updateProfileAction(formData: FormData) {
          return { success: false, error: "El nombre debe tener al menos 2 caracteres" }
     }
 
-    let imageUrl = undefined;
+    let imageBase64 = undefined;
 
-    /*
     if (file && file.size > 0) {
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            return { success: false, error: "La imagen es demasiado grande (máximo 5MB)" }
+        if (file.size > 2 * 1024 * 1024) { // 2MB limit for DB storage
+            return { success: false, error: "La imagen es demasiado grande (máximo 2MB)" }
         }
 
         const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
@@ -36,37 +33,22 @@ export async function updateProfileAction(formData: FormData) {
         try {
             const bytes = await file.arrayBuffer()
             const buffer = Buffer.from(bytes)
-
-            // Create unique filename
-            // Sanitize email for filename
-            const safeEmail = session.user.email.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const filename = `avatar-${safeEmail}-${Date.now()}.${file.name.split('.').pop()}`
-            const uploadDir = join(process.cwd(), 'public', 'uploads', 'avatars')
-            
-            // Ensure dir exists
-            await mkdir(uploadDir, { recursive: true })
-            
-            const filepath = join(uploadDir, filename)
-            await writeFile(filepath, buffer)
-            
-            imageUrl = `/uploads/avatars/${filename}`
+            const base64String = buffer.toString('base64')
+            imageBase64 = `data:${file.type};base64,${base64String}`
         } catch (e) {
-            console.error("Upload error:", e)
-            return { success: false, error: "Error al subir la imagen" }
+            console.error("Image processing error:", e)
+            return { success: false, error: "Error al procesar la imagen" }
         }
     }
-    */
 
     const userEmail = session.user.email;
     
-    // Explicitly construct the data object to avoid potential issues with spreading undefined
     const updateData: any = { name: name };
-    if (imageUrl) {
-        updateData.image = imageUrl;
+    if (imageBase64) {
+        updateData.image = imageBase64;
     }
 
     try {
-        // First find the user to ensure we have the ID and they exist
         const user = await prisma.user.findUnique({
             where: { email: userEmail }
         });
@@ -81,10 +63,9 @@ export async function updateProfileAction(formData: FormData) {
         })
 
         revalidatePath('/configuracion')
-        // We might need to revalidate root or other places where avatar is shown
         revalidatePath('/', 'layout') 
         
-        return { success: true, image: imageUrl }
+        return { success: true }
     } catch (error) {
         console.error("Error updating profile:", error)
         return { success: false, error: "Error al actualizar el perfil" }

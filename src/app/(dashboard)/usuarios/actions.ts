@@ -137,6 +137,33 @@ export async function deleteUser(id: string) {
     }
 }
 
+const RoleSchema = z.object({
+  name: z.string().min(2, "El nombre del rol debe tener al menos 2 caracteres").regex(/^[A-Z_]+$/, "El nombre debe ser mayúsculas y guiones bajos (ej: MANAGER, SUPER_USER)"),
+  description: z.string().optional()
+})
+
+export async function createRole(data: z.infer<typeof RoleSchema>) {
+    const session = await auth()
+    if (session?.user?.role !== 'ADMIN') return { success: false, error: "Unauthorized" }
+
+    const validated = RoleSchema.safeParse(data);
+    if (!validated.success) return { success: false, error: validated.error.flatten() }
+
+    try {
+        await prisma.role.create({
+            data: {
+                name: validated.data.name,
+                description: validated.data.description
+            }
+        })
+        revalidatePath('/usuarios/roles')
+        return { success: true }
+    } catch (e) {
+        console.error(e)
+        return { success: false, error: "Error al crear rol (posible duplicado)" }
+    }
+}
+
 export async function updateRolePermissions(roleId: string, permissionIds: string[]) {
     const session = await auth()
     // Role management is strictly for ADMIN role for now, or could be a specific permission
