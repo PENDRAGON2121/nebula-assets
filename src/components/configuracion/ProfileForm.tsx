@@ -13,6 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { updateProfileAction } from "@/app/(dashboard)/configuracion/actions"
@@ -136,13 +137,13 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 />
                 
                 <div className="space-y-2">
-                    <FormLabel>Email</FormLabel>
-                    <Input value={user.email || ''} disabled className="bg-muted" />
+                    <Label htmlFor="email-display">Email</Label>
+                    <Input id="email-display" value={user.email || ''} disabled className="bg-muted" />
                 </div>
 
                 <div className="space-y-2">
-                    <FormLabel>Rol</FormLabel>
-                    <Input value={user.role || 'Usuario'} disabled className="bg-muted" />
+                    <Label htmlFor="role-display">Rol</Label>
+                    <Input id="role-display" value={user.role || 'Usuario'} disabled className="bg-muted" />
                 </div>
 
                 <Button type="submit" disabled={isLoading}>
