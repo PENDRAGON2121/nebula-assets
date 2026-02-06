@@ -6,6 +6,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 // Enums
@@ -64,6 +65,11 @@ model User {
   roleId        String?   // Opcional temporalmente para facilitar migración
   role          Role?     @relation(fields: [roleId], references: [id])
   
+  // Tickets relations
+  ticketsAsignados  Ticket[] @relation("TicketAssignee")
+  ticketsReportados Ticket[] @relation("TicketReporter")
+  comentarios       TicketComment[]
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -87,6 +93,7 @@ model Activo {
   // Relaciones
   asignaciones  Asignacion[]
   mantenimientos Mantenimiento[]
+  tickets       Ticket[]
 
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -102,6 +109,7 @@ model Persona {
   activo        Boolean      @default(true) // Si el empleado sigue en la empresa
 
   asignaciones  Asignacion[]
+  ticketsSolicitados Ticket[]
 
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -144,4 +152,63 @@ model Mantenimiento {
 
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+}
+
+// --- TICKET SYSTEM ---
+
+enum TicketPriority {
+  BAJA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum TicketStatus {
+  ABIERTO
+  EN_PROGRESO
+  ESPERA_CLIENTE
+  RESUELTO
+  CERRADO
+}
+
+model Ticket {
+  id            String         @id @default(cuid())
+  titulo        String
+  descripcion   String
+  status        TicketStatus   @default(ABIERTO)
+  prioridad     TicketPriority @default(MEDIA)
+
+  // Relaciones con el sistema existente
+  activoId      String?        // El dispositivo dañado (Opcional)
+  activo        Activo?        @relation(fields: [activoId], references: [id])
+  
+  asignadoAId   String?        // Técnico asignado (User)
+  asignadoA     User?          @relation("TicketAssignee", fields: [asignadoAId], references: [id])
+  
+  creadoPorId   String?        // Quien reportó (User/Admin)
+  creadoPor     User?          @relation("TicketReporter", fields: [creadoPorId], references: [id])
+  
+  // Si reporta un empleado externo (Persona) en lugar de un usuario del sistema
+  solicitanteId String?        
+  solicitante   Persona?       @relation(fields: [solicitanteId], references: [id])
+
+  comentarios   TicketComment[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model TicketComment {
+  id        String   @id @default(cuid())
+  contenido String
+  interno   Boolean  @default(false) // Nota solo para técnicos
+  
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  
+  autorId   String
+  autor     User     @relation(fields: [autorId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
