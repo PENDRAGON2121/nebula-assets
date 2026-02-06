@@ -52,7 +52,7 @@ export function Sidebar({ className }: SidebarProps) {
         <div className="mt-6 grid items-start px-2 text-sm font-medium lg:px-4">
            <div className="px-3 py-2 text-xs font-medium text-muted-foreground">Ecosistema</div>
            <Link
-              href={process.env.NEXT_PUBLIC_TICKETS_URL ?? 'http://localhost:3001'}
+              href={process.env.NEXT_PUBLIC_TICKETS_URL || 'http://localhost:3001'}
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               target="_blank"
            >
