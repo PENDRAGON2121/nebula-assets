@@ -24,8 +24,7 @@ async function getUser(email: string) {
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   ...authConfig,
-  // Explicitly defined secret (falls back to hardcoded for dev/docker build sanity)
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "supersecretShouldChangeThisInProd",
+  secret: process.env.AUTH_SECRET,
   session: {
     strategy: "jwt",
   },
