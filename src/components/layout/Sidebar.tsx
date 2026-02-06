@@ -9,15 +9,12 @@ import { useSession } from 'next-auth/react';
 import { hasPermission } from '@/lib/rbac';
 import { Ticket, ExternalLink } from 'lucide-react';
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-  ticketsUrl?: string;
-}
+interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function Sidebar({ className, ticketsUrl }: SidebarProps) {
+export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user;
-  const finalTicketsUrl = ticketsUrl || process.env.NEXT_PUBLIC_TICKETS_URL || 'http://localhost:3001';
 
   return (
     <div className={cn("flex h-full flex-col bg-muted/40", className)}>
@@ -52,20 +49,19 @@ export function Sidebar({ className, ticketsUrl }: SidebarProps) {
           })}
         </nav>
         
-        {finalTicketsUrl && (
-          <div className="mt-6 grid items-start px-2 text-sm font-medium lg:px-4">
-             <div className="px-3 py-2 text-xs font-medium text-muted-foreground">Ecosistema</div>
-             <Link
-                href={finalTicketsUrl}
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-                target="_blank"
-             >
-                <Ticket className="h-4 w-4" />
-                Nebula Tickets
-                <ExternalLink className="ml-auto h-3 w-3 opacity-50" />
-             </Link>
-          </div>
-        )}
+        <div className="mt-6 grid items-start px-2 text-sm font-medium lg:px-4">
+            <div className="px-3 py-2 text-xs font-medium text-muted-foreground">Ecosistema</div>
+            <a
+            href={process.env.NEXT_PUBLIC_TICKETS_URL || "#"}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+            target="_blank"
+            rel="noopener noreferrer"
+            >
+            <Ticket className="h-4 w-4" />
+            Nebula Tickets
+            <ExternalLink className="ml-auto h-3 w-3 opacity-50" />
+            </a>
+        </div>
       </div>
     </div>
   );

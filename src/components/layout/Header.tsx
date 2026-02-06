@@ -11,7 +11,7 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { CommandMenu } from '@/components/layout/CommandMenu';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export function Header({ user, ticketsUrl }: { user?: User, ticketsUrl?: string }) {
+export function Header({ user }: { user?: User }) {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
       <Sheet>
@@ -22,7 +22,7 @@ export function Header({ user, ticketsUrl }: { user?: User, ticketsUrl?: string 
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="flex flex-col p-0">
-             <Sidebar className="border-none" ticketsUrl={ticketsUrl} /> 
+             <Sidebar className="border-none" /> 
         </SheetContent>
       </Sheet>
       
