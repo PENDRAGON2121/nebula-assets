@@ -17,7 +17,7 @@ export function Sidebar({ className, ticketsUrl }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user;
-  const finalTicketsUrl = ticketsUrl || process.env.NEXT_PUBLIC_TICKETS_URL;
+  const finalTicketsUrl = ticketsUrl || process.env.NEXT_PUBLIC_TICKETS_URL || 'http://localhost:3001';
 
   return (
     <div className={cn("flex h-full flex-col bg-muted/40", className)}>
