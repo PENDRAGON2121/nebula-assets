@@ -6,7 +6,8 @@ import {
   Wrench, 
   Settings, 
   LucideIcon,
-  UserCog
+  UserCog,
+  Ticket
 } from 'lucide-react';
 
 import { PERMISSIONS } from '@/config/permissions';
@@ -24,6 +25,7 @@ export const navItems: NavItem[] = [
   { href: '/personas', label: 'Personas', icon: Users, permission: PERMISSIONS.PEOPLE.READ },
   { href: '/asignaciones', label: 'Asignaciones', icon: ArrowLeftRight, permission: PERMISSIONS.ASSIGNMENTS.READ },
   { href: '/mantenimientos', label: 'Mantenimientos', icon: Wrench, permission: PERMISSIONS.MAINTENANCE.READ },
+  { href: process.env.NEXT_PUBLIC_TICKETS_URL || 'http://localhost:3001', label: 'Tickets', icon: Ticket },
   { href: '/usuarios', label: 'Usuarios', icon: UserCog, permission: PERMISSIONS.USERS.READ },
   { href: '/configuracion', label: 'Configuración', icon: Settings, permission: PERMISSIONS.USERS.WRITE }, // Assuming restricted config
 ];
