@@ -9,6 +9,7 @@
 - **Assignments (`/asignaciones`)**: Track who holds which asset. Support for check-in/check-out workflows and historical assignment logs.
 - **People (`/personas`)**: Directory of employees or departments to whom assets can be assigned.
 - **Maintenance (`/mantenimientos`)**: Record repairs, upgrades, and routine maintenance with cost tracking and status updates.
+- **Tickets (Integration)**: Integration point for the external "Nebula Tickets" help desk system.
 
 ### System & Security
 - **RBAC (Role-Based Access Control)**: Granular permission system (Read/Write/Delete) for every module.
@@ -71,6 +72,10 @@ AUTH_URL="http://localhost:3000"
 
 # Public App URL
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Nebula Tickets Integration
+# URL for the secondary Help Desk application
+NEXT_PUBLIC_TICKETS_URL="http://localhost:3001"
 ```
 
 ### 4. Start the Database

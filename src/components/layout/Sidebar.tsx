@@ -7,6 +7,7 @@ import { navItems } from '@/config/nav';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { hasPermission } from '@/lib/rbac';
+import { Ticket, ExternalLink } from 'lucide-react';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -25,6 +26,7 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
       <div className="flex-1 overflow-auto py-2">
         <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+          <div className="px-3 py-2 text-xs font-medium text-muted-foreground">Plataforma</div>
           {navItems.map((item) => {
             if (item.permission && !hasPermission(user, item.permission)) {
               return null;
@@ -46,6 +48,19 @@ export function Sidebar({ className }: SidebarProps) {
             );
           })}
         </nav>
+        
+        <div className="mt-6 grid items-start px-2 text-sm font-medium lg:px-4">
+           <div className="px-3 py-2 text-xs font-medium text-muted-foreground">Ecosistema</div>
+           <Link
+              href={process.env.NEXT_PUBLIC_TICKETS_URL || 'http://localhost:3001'}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+              target="_blank" // Optional: open in new tab? User didn't specify, but distinct apps usually imply new tab or full redirect. Let's stick to same tab unless requested, or maybe new tab is safer for "separate system". I'll default to same tab (spa feel) but since it's a different port/url, it's a full reload.
+           >
+              <Ticket className="h-4 w-4" />
+              Nebula Tickets
+              <ExternalLink className="ml-auto h-3 w-3 opacity-50" />
+           </Link>
+        </div>
       </div>
     </div>
   );
