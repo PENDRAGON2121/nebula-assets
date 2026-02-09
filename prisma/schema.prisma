@@ -202,13 +202,59 @@ model TicketComment {
   id        String   @id @default(cuid())
   contenido String
   interno   Boolean  @default(false) // Nota solo para técnicos
-  
+
   ticketId  String
   ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  
+
   autorId   String
   autor     User     @relation(fields: [autorId], references: [id])
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// --- LICENSE MANAGEMENT ---
+
+enum EstadoLicencia {
+  ACTIVA
+  EXPIRADA
+  POR_RENOVAR
+  CANCELADA
+}
+
+enum TipoLicencia {
+  PERPETUA
+  SUSCRIPCION
+  PRUEBA
+  OEM
+}
+
+model Licencia {
+  id              String         @id @default(cuid())
+  nombre          String         // Nombre del software/servicio (ej: "Microsoft 365 Business")
+  proveedor       String         // Vendor/proveedor
+  tipoLicencia    TipoLicencia   @default(SUSCRIPCION)
+  estado          EstadoLicencia @default(ACTIVA)
+  claveProducto   String?        // Clave de licencia/producto
+
+  // Cantidades
+  cantidadTotal   Int            // Total de licencias adquiridas
+  cantidadAsignada Int           @default(0) // Licencias asignadas a dispositivos/personas
+
+  // Fechas
+  fechaCompra     DateTime
+  fechaExpiracion DateTime?      // Null para licencias perpetuas
+
+  // Costos
+  costoUnitario   Decimal        @db.Decimal(10, 2)
+  costoTotal      Decimal        @db.Decimal(10, 2)
+
+  // Renovación
+  autoRenovacion  Boolean        @default(false)
+  diasNotificacion Int?          // Días antes de expiración para notificar
+
+  notas           String?
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 }

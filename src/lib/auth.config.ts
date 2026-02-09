@@ -38,6 +38,7 @@ export const authConfig = {
                             nextUrl.pathname.startsWith('/personas') ||
                             nextUrl.pathname.startsWith('/asignaciones') ||
                             nextUrl.pathname.startsWith('/mantenimientos') ||
+                            nextUrl.pathname.startsWith('/licencias') ||
                             nextUrl.pathname.startsWith('/configuracion') ||
                             nextUrl.pathname.startsWith('/reportes') ||
                             nextUrl.pathname.startsWith('/usuarios') ||
@@ -58,6 +59,7 @@ export const authConfig = {
           if (path.startsWith('/personas') && !hasPermission(user, PERMISSIONS.PEOPLE.READ)) return false;
           if (path.startsWith('/asignaciones') && !hasPermission(user, PERMISSIONS.ASSIGNMENTS.READ)) return false;
           if (path.startsWith('/mantenimientos') && !hasPermission(user, PERMISSIONS.MAINTENANCE.READ)) return false;
+          if (path.startsWith('/licencias') && !hasPermission(user, PERMISSIONS.LICENSES.READ)) return false;
           if (path.startsWith('/usuarios') && !hasPermission(user, PERMISSIONS.USERS.READ)) return false;
           
           return true;

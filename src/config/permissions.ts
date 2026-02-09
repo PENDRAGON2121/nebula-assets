@@ -21,6 +21,11 @@ export const PERMISSIONS = {
   ASSIGNMENTS: {
     READ: 'assignments:read',
     WRITE: 'assignments:write',
+  },
+  LICENSES: {
+    READ: 'licenses:read',
+    WRITE: 'licenses:write',
+    DELETE: 'licenses:delete',
   }
 } as const;
 
@@ -30,4 +35,5 @@ export const ALL_PERMISSIONS = [
   ...Object.values(PERMISSIONS.PEOPLE),
   ...Object.values(PERMISSIONS.MAINTENANCE),
   ...Object.values(PERMISSIONS.ASSIGNMENTS),
+  ...Object.values(PERMISSIONS.LICENSES),
 ];
