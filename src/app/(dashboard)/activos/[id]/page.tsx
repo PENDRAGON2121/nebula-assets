@@ -31,7 +31,7 @@ export default async function ActivoDetailPage({ params }: { params: Promise<{ i
 
   // Combine history for timeline
   const history = [
-    ...activo.asignaciones.map(a => ({
+    ...activo.asignaciones.map((a: (typeof activo.asignaciones)[number]) => ({
       type: 'ASIGNACION',
       date: a.fechaAsignacion,
       title: 'Asignación',
@@ -39,7 +39,7 @@ export default async function ActivoDetailPage({ params }: { params: Promise<{ i
       status: a.fechaDevolucion ? 'Devuelto' : 'Activo',
       details: a.observaciones
     })),
-    ...activo.mantenimientos.map(m => ({
+    ...activo.mantenimientos.map((m: (typeof activo.mantenimientos)[number]) => ({
       type: 'MANTENIMIENTO',
       date: m.fechaInicio,
       title: `Mantenimiento ${m.tipo}`,
